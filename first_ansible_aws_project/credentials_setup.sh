@@ -14,13 +14,14 @@ echo 'Creating a variable file to store AWS credentials'
 
 ansible-vault create group_vars/all/credentials.yml --vault-password-file vault.pass
 
-rm -f temp.yml
+rm -f $VAR_DIR/credentials.yml temp.yml
 
-( echo "cat << EOF > ${VAR_DIR}/credentials.yml";
+( echo "tee ${VAR_DIR}/credentials.yml <<EOF > /dev/null";
   cat $TEMP_DIR/credentials.yml;
-  echo "EOF";
-) > temp.yml
+) >temp.yml
 . temp.yml
+
+rm -f temp.yml
 
 cat $VAR_DIR/credentials.yml
 
