@@ -1,0 +1,12 @@
+# Runtime and backup files
+*.retry
+*.original
+*.tmp
+*.bkp
+*.*~
+# Possible credential files
+*pwd*
+*pass*
+*password*
+*.txt
+group_vars/all/credentials.yml
