@@ -1,0 +1,15 @@
+- name: Provision SSH and Security groups
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: Create the EC2 SSH key
+      ec2_key:
+        name: ansible_agent
+      register: ec2_key
+
+    - name: Store the SSH key
+      ansible.builtin.copy:
+        content: '{{ ec2_key.key.private_key }}'
+        dest: '{{ playbook_dir }}/keys/ec2_key.pem'
+        mode: 0600
+      when: ec2_key.changed
