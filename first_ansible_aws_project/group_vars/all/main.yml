@@ -1,0 +1,4 @@
+my_ip: 62.16.0.223
+ec2_amazonlinux2_image_id: ami-0ee415e1b8b71305f
+ec2_sg_app_id: 
+ec2_webserver_id:
