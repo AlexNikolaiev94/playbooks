@@ -9,11 +9,9 @@
         return_content: yes
       register: ip_response
   
-    - name: Store current public IP address to variables
-      lineinfile:
-        path: "{{ playbook_dir }}/group_vars/all/main.yml"
-        regex: '^my_ip:'
-        line: "my_ip: {{ ip_response.content }}"
+    - name: Store current public IP address
+      set_fact:
+        my_ip: "{{ ip_response.content }}"
 
   roles:
     - network_setup
