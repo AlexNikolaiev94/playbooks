@@ -1,4 +1,9 @@
-my_ip: 62.16.0.223
+my_ip:
 ec2_amazonlinux2_image_id: ami-0ee415e1b8b71305f
-ec2_sg_app_id: 
+web_subnet_id:
+db_subnet_id:
+rds_ec2_sg:
+ec2_rds_sg:
+webserver_sg:
 ec2_webserver_id:
+region: eu-west-1

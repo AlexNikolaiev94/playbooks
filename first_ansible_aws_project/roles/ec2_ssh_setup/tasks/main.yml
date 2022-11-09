@@ -1,0 +1,17 @@
+- name: Create the EC2 SSH key
+  amazon.aws.ec2_key:
+    name: ansible_agent
+  register: ec2_key
+
+- name: Create a shared folder for key to be stored for reusal
+  file:
+    path: ../../shared
+    state: directory
+    mode: 0755
+
+- name: Store the SSH key
+  ansible.builtin.copy:
+    content: "{{ ec2_key.key.private_key }}"
+    dest: ../../shared/ec2_key.pem
+    mode: 0600
+  when: ec2_key.changed

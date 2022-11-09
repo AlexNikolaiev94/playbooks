@@ -12,3 +12,8 @@ This is a playbook for deploying [a simple eCommerce application](https://github
 1. AWS CLI (latest)
 2. Python3 and dependencies (boto, boto3)
 3. Ansible
+
+### Running
+
+1. Make sure you are logged in to AWS CLI on the ansible host machine. Since this playbook requires a big list of permissions, it is better to create an IAM user with admin privileges and log in as that user.
+2. Run `ansible-playbook -i inventory.yml -e 'ansible_python_interpreter=/usr/bin/python3' playbook.yml` 

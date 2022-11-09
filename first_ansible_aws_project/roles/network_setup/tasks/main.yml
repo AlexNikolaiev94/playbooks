@@ -1,0 +1,126 @@
+- name: Create VPC
+  amazon.aws.ec2_vpc_net:
+    name: Default_VPC
+    cidr_block: 10.0.0.0/16
+    region: "{{ region }}"
+    state: present
+  register: vpc_reg
+
+- name: Create a public subnet for EC2 instance
+  amazon.aws.ec2_vpc_subnet:
+    state: present
+    vpc_id: "{{ vpc_reg.vpc.id }}"
+    region: "{{ region }}"
+    cidr: 10.0.0.0/24
+    map_public: yes
+    tags:
+      Name: 'Public'
+  register: web_subnet
+
+- name: Create a private subnet for RDS instance
+  amazon.aws.ec2_vpc_subnet:
+    state: present
+    vpc_id: "{{ vpc_reg.vpc.id }}"
+    region: "{{ region }}"
+    cidr: 10.0.1.0/24
+    map_public: no
+    tags:
+      Name: 'RDS-pvt'
+  register: db_subnet
+
+- name: Create an Internet Gateway
+  amazon.aws.ec2_vpc_igw:
+    vpc_id: "{{ vpc_reg.vpc.id }}"
+    region: "{{ region }}"
+    state: present
+    tags:
+      Name: "Default Gateway"
+  register: igw
+
+- name: Create a main route table and register the gateway
+  amazon.aws.ec2_vpc_route_table:
+    vpc_id: "{{ vpc_reg.vpc.id }}"
+    region: "{{ region }}"
+    subnets:
+      - "{{ web_subnet.subnet.id }}"
+    routes:
+      - dest: 0.0.0.0/0
+        gateway_id: "{{ igw.gateway_id }}"
+    tags:
+      Name: "public-rt"
+
+- name: Create a route table for private subnet associated with RDS
+  amazon.aws.ec2_vpc_route_table:
+    vpc_id: "{{ vpc_reg.vpc.id }}"
+    region: "{{ region }}"
+    subnets:
+      - "{{ db_subnet.subnet.id }}"
+    tags:
+      Name: "pvt-rds-rt"
+
+- name: Create a security group for inbound traffic from EC2 to RDS
+  amazon.aws.ec2_group:
+    name: default-rds-ec2
+    description: Security group attached to RDS to allow connecting to the database
+    vpc_id: "{{ vpc_reg.vpc.id }}"
+    region: "{{ region }}"
+    rules:
+      - proto: tcp
+        ports:
+          - 3306
+        group_name: default-ec2-rds
+        group_desc: Security group attached to EC2 instances to allow access to RDS
+        rule_desc: Allow access from EC2 instances within this group to connect to RDS
+    rules_egress: []
+  register: rds_ec2_sg
+
+- name: Create a security group for outbound traffic from EC2 to RDS
+  amazon.aws.ec2_group:
+    name: default-ec2-rds
+    description: Security group attached to EC2 instances to allow access to RDS
+    vpc_id: "{{ vpc_reg.vpc.id }}"
+    region: "{{ region }}"
+    rules: []
+    rules_egress:
+      - proto: tcp
+        ports:
+          - 3306
+        group_name: default-rds-ec2
+        rule_desc: Allow traffic to RDS instances from EC2
+  register: ec2_rds_sg
+
+- name: Create a security group for the webserver traffic
+  amazon.aws.ec2_group:
+    name: Web Server
+    description: Default VPC security group for webserver instance
+    vpc_id: "{{ vpc_reg.vpc.id }}"
+    region: "{{ region }}"
+    rules:
+      - proto: tcp
+        ports:
+          - 443
+        cidr_ip: 0.0.0.0/0
+        rule_desc: Allow access to nginx from anywhere
+      - proto: tcp
+        ports:
+          - 8080
+        cidr_ip: "{{ my_ip }}/32"
+        rule_desc: Allow direct access from my IP
+      - proto: tcp
+        ports:
+          - 22
+        cidr_ip: "{{ my_ip }}/32"
+        rule_desc: Allow SSH access from my IP
+  register: web_sg
+
+- name: Save task artifacts to variables
+  lineinfile:
+    path: "{{ playbook_dir }}/group_vars/all/main.yml"
+    regex: "{{ item.regex }}"
+    line: "{{ item.line }}"
+  loop:
+    - { regex: "^web_subnet_id:", line: "web_subnet_id: {{ web_subnet.subnet.id }}" }
+    - { regex: "^db_subnet_id:", line: "db_subnet_id: {{ db_subnet.subnet.id }}" }
+    - { regex: "^rds_ec2_sg:", line: "rds_ec2_sg: {{ rds_ec2_sg.group_id }}" }
+    - { regex: "^ec2_rds_sg:", line: "ec2_rds_sg: {{ ec2_rds_sg.group_id }}" }
+    - { regex: "^webserver_sg:", line: "webserver_sg: {{ web_sg.group_id }}" }
