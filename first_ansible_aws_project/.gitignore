@@ -9,4 +9,5 @@
 *pass*
 *password*
 *.txt
-group_vars/all/credentials.yml
+# Shared folder
+shared/

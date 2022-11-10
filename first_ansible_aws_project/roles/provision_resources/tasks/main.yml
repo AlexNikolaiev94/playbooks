@@ -1,0 +1,16 @@
+- name: Get current public IP address
+  uri:
+    url: http://ifconfig.me/ip
+    return_content: yes
+  register: ip_response
+
+- name: Setup VPC and Security Groups
+  import_tasks: setup_vpc.yml
+  vars:
+    ip_addr: "{{ ip_response.content }}"
+
+- name: Create and store a key to access web server EC2 instance
+  import_tasks: create_ec2_keypair.yml
+
+- name: Create an EC2 instance for webserver
+  import_tasks: create_ec2_instance.yml

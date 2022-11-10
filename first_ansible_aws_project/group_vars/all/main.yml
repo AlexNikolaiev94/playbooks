@@ -1,8 +1,0 @@
-ec2_amazonlinux2_image_id: ami-0ee415e1b8b71305f
-web_subnet_id:
-db_subnet_id:
-rds_ec2_sg:
-ec2_rds_sg:
-webserver_sg:
-ec2_webserver_id:
-region: eu-west-1

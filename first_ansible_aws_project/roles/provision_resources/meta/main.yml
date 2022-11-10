@@ -1,6 +1,6 @@
 galaxy_info:
   role_name: ec2_ssh_setup
   author: AlexNikolaiev94
-  description: Setting up SSH access to EC2 instance
+  description: Provision AWS resources - VPC, EC2, RDS
   license: MIT
   min_ansible_version: '2.4'

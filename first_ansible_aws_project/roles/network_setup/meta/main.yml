@@ -1,6 +1,0 @@
-galaxy_info:
-  role_name: network_setup
-  author: AlexNikolaiev94
-  description: Setting up VPC, Subnets and Security Groups in AWS
-  license: MIT
-  min_ansible_version: '2.4'

@@ -1,17 +1,9 @@
 ---
-- name: Provision and deploy the eCommerce app on AWS
+- name: Provision the AWS resources
   hosts: localhost
-
-  pre_tasks:
-    - name: Get current public IP address
-      uri:
-        url: http://ifconfig.me/ip
-        return_content: yes
-      register: ip_response
-  
-    - name: Store current public IP address
-      set_fact:
-        my_ip: "{{ ip_response.content }}"
+  vars:
+    ec2_amazonlinux2_image_id: ami-0ee415e1b8b71305f
+    region: eu-west-1
 
   roles:
-    - network_setup
+    - provision_resources
