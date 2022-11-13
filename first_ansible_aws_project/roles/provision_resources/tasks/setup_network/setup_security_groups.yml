@@ -1,0 +1,77 @@
+- name: Create a security group for inbound traffic from EC2 to RDS
+  amazon.aws.ec2_group:
+    name: default-rds-ec2
+    description: Security group attached to RDS to allow connecting to the database
+    vpc_id: "{{ vpc_reg.vpc.id }}"
+    region: "{{ region }}"
+    rules:
+      - proto: tcp
+        ports:
+          - 3306
+        group_name: default-ec2-rds
+        group_desc: Security group attached to EC2 instances to allow access to RDS
+        rule_desc: Allow access from EC2 instances within this group to connect to RDS
+    rules_egress: []
+    tags:
+      Name: 'RDS-inbound-sg'
+
+- name: Create a security group for outbound traffic from EC2 to RDS
+  amazon.aws.ec2_group:
+    name: default-ec2-rds
+    description: Security group attached to EC2 instances to allow access to RDS
+    vpc_id: "{{ vpc_reg.vpc.id }}"
+    region: "{{ region }}"
+    rules: []
+    rules_egress:
+      - proto: tcp
+        ports:
+          - 3306
+        group_name: default-rds-ec2
+        rule_desc: Allow traffic to RDS instances from EC2
+    tags:
+      Name: 'EC2-RDS-sg'
+
+- name: Create a security group for NAT instance
+  amazon.aws.ec2_group:
+    name: Web Server
+    description: Default VPC security group for webserver instance
+    vpc_id: "{{ vpc_reg.vpc.id }}"
+    region: "{{ region }}"
+    rules:
+      - proto: tcp
+        ports:
+          - 80
+        cidr_ip: 10.0.3.0/24
+        rule_desc: Allow HTTP traffic to private subnet A
+      - proto: tcp
+        ports:
+          - 443
+        cidr_ip: 10.0.3.0/24
+        rule_desc: Allow HTTPS traffic to private subnet A
+      - proto: tcp
+        ports:
+          - 80
+        cidr_ip: 10.0.4.0/24
+        rule_desc: Allow HTTP traffic to private subnet B
+      - proto: tcp
+        ports:
+          - 443
+        cidr_ip: 10.0.4.0/24
+        rule_desc: Allow HTTPS traffic to private subnet B
+      - proto: tcp
+        ports:
+          - 80
+        cidr_ip: 10.0.5.0/24
+        rule_desc: Allow HTTP traffic to private subnet C
+      - proto: tcp
+        ports:
+          - 443
+        cidr_ip: 10.0.5.0/24
+        rule_desc: Allow HTTPS traffic to private subnet C
+      - proto: tcp
+        ports:
+          - 22
+        cidr_ip: "{{ ip_addr }}/32"
+        rule_desc: Allow SSH access to NAT instance from host network over internet gateway
+    tags:
+      Name: 'nat-sg'

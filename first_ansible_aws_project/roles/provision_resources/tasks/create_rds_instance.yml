@@ -1,0 +1,53 @@
+- name: Get the according subnet ID
+  amazon.aws.ec2_vpc_subnet_info:
+    filters:
+      "tag:Name": "RDS-pvt"
+  register: subnet_reg
+
+- name: Get the security groups for EC2 instance by tag
+  amazon.aws.ec2_group_info:
+    filters:
+      "tag:Name": "RDS-inbound-sg"  
+  register: sg_reg
+
+- debug:
+    msg: "{{ sg_reg.security_groups[0].group_id }}"
+
+- name: Create a MariaDB RDS instance
+  community.aws.rds:
+    command: create
+    instance_name: ecomwebsite-db
+    wait: yes
+    wait_timeout: 3600
+    db_engine: mariadb
+    db_name: ecomdb
+    size: 20
+    instance_type: db.t2.micro
+    username: "admin"
+    password: "!p4$$w0rd"
+    port: 3306
+    region: "{{ region }}"
+    subnet: "{{ subnet_reg.subnets[0].id }}"
+    vpc_security_groups: "{{ sg_reg.security_groups[0].group_id }}"
+    tags:
+      Name: "ecomdb-master"
+      Role: Database
+
+  # community.aws.rds_instance:
+  #   db_instance_identifier: onikowebsite-db
+  #   region: "{{ region }}"
+  #   instance_type: db.t2.micro
+  #   allocated_storage: 20
+  #   subnet_group:
+  #     subnets:
+  #       subnet_identifier: "{{ subnet_reg.subnets[0].id }}"
+  #     vpc_id: "{{ subnet_reg.subnets[0].vpc_id }}"
+  #   vpc_security_group_ids:
+  #     - "{{ sg_reg.security_groups[0].group_id }}"
+  #   engine: mariadb
+  #   state: present
+  #   master_username: admin
+  #   master_user_password: "!p4$$w0rd"
+  #   db_name: ecomdb
+  #   tags:
+  #     Name: "ecodb-master"

@@ -3,6 +3,7 @@
   hosts: localhost
   vars:
     ec2_amazonlinux2_image_id: ami-0ee415e1b8b71305f
+    nat_instance_image_id: ami-037981e531e811c07
     region: eu-west-1
 
   roles:

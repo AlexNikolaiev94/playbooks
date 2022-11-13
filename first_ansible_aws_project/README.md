@@ -10,10 +10,11 @@ This is a playbook for deploying [a simple eCommerce application](https://github
 
 ### Prerequisites
 1. AWS CLI (latest)
-2. Python3 and dependencies (boto, boto3)
-3. Ansible
+2. `amazon.aws` and `community.aws` collections. Run `ansible-galaxy collection list` to check whether they are installed. If not, run `ansible-galaxy collection install amazon.aws community.aws`.
+3. Python3 and dependencies (boto, boto3)
+4. Ansible
 
 ### Running
 
-1. Make sure you are logged in to AWS CLI on the ansible host machine. Since this playbook requires a big list of permissions, it is better to create an IAM user with admin privileges and log in as that user.
+1. Make sure you are logged in to AWS CLI on the ansible host machine. Since this playbook requires a big list of permissions, it is better to create an IAM user with admin privileges and log in to your AWS CLI as that user.
 2. Run `ansible-playbook -i inventory.yml -e 'ansible_python_interpreter=/usr/bin/python3' playbook.yml` 

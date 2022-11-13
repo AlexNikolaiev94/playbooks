@@ -1,0 +1,41 @@
+- name: Get the public subnets
+  amazon.aws.ec2_vpc_subnet_info:
+    filters:
+      "tag:Name": "{{ item }}"
+  loop:
+    - "pub-subnet-a"
+    - "pub-subnet-b"
+    - "pub-subnet-c"
+  register: subnet_reg
+
+- name: Get the security groups for EC2 instance by tag
+  amazon.aws.ec2_group_info:
+    filters:
+      "tag:Name": "nat-sg"   
+  register: sg_reg
+
+- name: Create NAT instance
+  amazon.aws.ec2_instance:
+    name: nat_instance
+    key_name: ecom_nat
+    vpc_subnet_id: "{{ subnet_reg.subnets[0].id }}"
+    instance_type: t2.micro
+    security_groups: "{{ sg_reg.security_groups[0].group_id }}"
+    network:
+      assign_public_ip: yes
+    image_id: "{{ nat_instance_image_id }}"
+    tags:
+      Name: nat_main
+      Role: NAT
+    register: nat_reg
+
+- name: Update main route table to map all traffic to NAT
+  amazon.aws.ec2_vpc_route_table:
+    vpc_id: "{{ vpc_reg.vpc.id }}"
+    region: "{{ region }}"
+    subnets: "{{ subnet_reg.subnets | map(attribute='id') | list"
+    routes:
+      - dest: 0.0.0.0/0
+        instance_id: "{{ nat_reg.instances[0].instance_id }}"
+    tags:
+      Name: "public-rt"

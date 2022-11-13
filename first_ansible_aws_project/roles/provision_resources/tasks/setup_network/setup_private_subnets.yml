@@ -1,0 +1,52 @@
+- name: Create a private subnet A
+  amazon.aws.ec2_vpc_subnet:
+    state: present
+    vpc_id: "{{ vpc_reg.vpc.id }}"
+    az: "{{ region }}a"
+    cidr: 10.0.3.0/24
+    map_public: no
+    tags:
+      Name: 'pvt-subnet-a'
+  register: pvt_subnet_a
+
+- name: Create a private subnet B
+  amazon.aws.ec2_vpc_subnet:
+    state: present
+    vpc_id: "{{ vpc_reg.vpc.id }}"
+    az: "{{ region }}b"
+    cidr: 10.0.4.0/24
+    map_public: no
+    tags:
+      Name: 'pvt-subnet-b'
+  register: pvt_subnet_b
+
+- name: Create a private subnet C
+  amazon.aws.ec2_vpc_subnet:
+    state: present
+    vpc_id: "{{ vpc_reg.vpc.id }}"
+    az: "{{ region }}c"
+    cidr: 10.0.5.0/24
+    map_public: no
+    tags:
+      Name: 'pvt-subnet-c'
+  register: pvt_subnet_c
+
+- name: Create a RDS subnet group
+  community.aws.rds_subnet_group:
+    state: present
+    name: "db_pvt_subnet_group"
+    description: RDS subnet group
+    region: "{{ region }}"
+    subnets:
+      - "{{ pvt_subnet_a.subnet.id }}"
+      - "{{ pvt_subnet_b.subnet.id }}"
+      - "{{ pvt_subnet_c.subnet.id }}"
+
+# - name: Create a route table for private subnet associated with RDS
+#   amazon.aws.ec2_vpc_route_table:
+#     vpc_id: "{{ vpc_reg.vpc.id }}"
+#     region: "{{ region }}"
+#     subnets:
+#       - "{{ db_subnet.subnet.id }}"
+#     tags:
+#       Name: "pvt-rds-rt"

@@ -1,0 +1,55 @@
+- name: Create a public subnet A
+  amazon.aws.ec2_vpc_subnet:
+    state: present
+    vpc_id: "{{ vpc_reg.vpc.id }}"
+    az: "{{ region }}a"
+    cidr: 10.0.0.0/24
+    map_public: yes
+    tags:
+      Name: 'pub-subnet-a'
+  register: pub_subnet_a
+
+- name: Create a public subnet B
+  amazon.aws.ec2_vpc_subnet:
+    state: present
+    vpc_id: "{{ vpc_reg.vpc.id }}"
+    az: "{{ region }}b"
+    cidr: 10.0.1.0/24
+    map_public: yes
+    tags:
+      Name: 'pub-subnet-b'
+  register: pub_subnet_b
+
+- name: Create a public subnet C
+  amazon.aws.ec2_vpc_subnet:
+    state: present
+    vpc_id: "{{ vpc_reg.vpc.id }}"
+    az: "{{ region }}c"
+    cidr: 10.0.2.0/24
+    map_public: yes
+    tags:
+      Name: 'pub-subnet-c'
+  register: pub_subnet_c
+
+- name: Create an Internet Gateway
+  amazon.aws.ec2_vpc_igw:
+    vpc_id: "{{ vpc_reg.vpc.id }}"
+    region: "{{ region }}"
+    state: present
+    tags:
+      Name: "igw-default"
+  register: igw
+
+- name: Create a route table for public subnets and register the internet gateway
+  amazon.aws.ec2_vpc_route_table:
+    vpc_id: "{{ vpc_reg.vpc.id }}"
+    region: "{{ region }}"
+    subnets:
+      - "{{ pub_subnet_a.subnet.id }}"
+      - "{{ pub_subnet_b.subnet.id }}"
+      - "{{ pub_subnet_c.subnet.id }}"
+    routes:
+      - dest: 0.0.0.0/0
+        gateway_id: "{{ igw.gateway_id }}"
+    tags:
+      Name: "public-rt"

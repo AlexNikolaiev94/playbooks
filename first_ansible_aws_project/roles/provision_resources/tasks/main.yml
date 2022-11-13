@@ -5,12 +5,15 @@
   register: ip_response
 
 - name: Setup VPC and Security Groups
-  import_tasks: setup_vpc.yml
+  import_tasks: setup_network/main.yml
   vars:
     ip_addr: "{{ ip_response.content }}"
 
-- name: Create and store a key to access web server EC2 instance
-  import_tasks: create_ec2_keypair.yml
+# - name: Create and store a key to access web server EC2 instance
+#   import_tasks: create_ec2_keypair.yml
 
-- name: Create an EC2 instance for webserver
-  import_tasks: create_ec2_instance.yml
+# - name: Create an EC2 instance for webserver
+#   import_tasks: create_ec2_instance.yml
+
+# - name: Create a RDS MariaDB instance
+#   import_tasks: create_rds_instance.yml

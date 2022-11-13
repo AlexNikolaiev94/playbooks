@@ -1,0 +1,21 @@
+- name: Create VPC
+  amazon.aws.ec2_vpc_net:
+    name: Default_VPC
+    cidr_block: 10.0.0.0/16
+    region: "{{ region }}"
+    state: present
+    tags:
+      Name: 'eCommVPC'
+  register: vpc_reg
+
+- name: Create public subnets and Internet Gateway
+  import_tasks: setup_public_subnets.yml
+
+- name: Create private subnets
+  import_tasks: setup_private_subnets.yml
+
+- name: Create Security Groups
+  import_tasks: setup_security_groups.yml
+
+- name: Create a NAT instance and map inbound traffic to item
+  import_tasks: create_nat_instance.yml
