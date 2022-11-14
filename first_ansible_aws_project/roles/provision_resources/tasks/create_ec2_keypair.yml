@@ -1,5 +1,5 @@
 - name: Create a shared folder for key to be stored for reusal
-  file:
+  ansible.builtin.file:
     path: "{{ playbook_dir }}/shared"
     state: directory
     mode: 0755

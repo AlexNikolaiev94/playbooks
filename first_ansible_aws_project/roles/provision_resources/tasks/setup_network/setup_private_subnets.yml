@@ -1,7 +1,7 @@
 - name: Create a private subnet A
   amazon.aws.ec2_vpc_subnet:
     state: present
-    vpc_id: "{{ vpc_reg.vpc.id }}"
+    vpc_id: "{{ vpc_id }}"
     az: "{{ region }}a"
     cidr: 10.0.3.0/24
     map_public: no
@@ -12,7 +12,7 @@
 - name: Create a private subnet B
   amazon.aws.ec2_vpc_subnet:
     state: present
-    vpc_id: "{{ vpc_reg.vpc.id }}"
+    vpc_id: "{{ vpc_id }}"
     az: "{{ region }}b"
     cidr: 10.0.4.0/24
     map_public: no
@@ -23,7 +23,7 @@
 - name: Create a private subnet C
   amazon.aws.ec2_vpc_subnet:
     state: present
-    vpc_id: "{{ vpc_reg.vpc.id }}"
+    vpc_id: "{{ vpc_id }}"
     az: "{{ region }}c"
     cidr: 10.0.5.0/24
     map_public: no
@@ -41,12 +41,3 @@
       - "{{ pvt_subnet_a.subnet.id }}"
       - "{{ pvt_subnet_b.subnet.id }}"
       - "{{ pvt_subnet_c.subnet.id }}"
-
-# - name: Create a route table for private subnet associated with RDS
-#   amazon.aws.ec2_vpc_route_table:
-#     vpc_id: "{{ vpc_reg.vpc.id }}"
-#     region: "{{ region }}"
-#     subnets:
-#       - "{{ db_subnet.subnet.id }}"
-#     tags:
-#       Name: "pvt-rds-rt"

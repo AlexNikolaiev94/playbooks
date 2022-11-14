@@ -1,0 +1,53 @@
+- name: Get the public subnets
+  amazon.aws.ec2_vpc_subnet_info:
+    region: "{{ region }}"
+    filters:
+      vpc-id: "{{ vpc_id }}"
+      "tag:Name": "pub-*"
+  register: pub_subnet_reg
+
+- name: Get the private subnets
+  amazon.aws.ec2_vpc_subnet_info:
+    region: "{{ region }}"
+    filters:
+      vpc-id: "{{ vpc_id }}"
+      "tag:Name": "pvt-*"
+  register: pvt_subnet_reg
+
+- name: Get the default route table of the VPC
+  amazon.aws.ec2_vpc_route_table_facts:
+    region: "{{ region }}"
+    filters:
+      vpc-id: "{{ vpc_id }}"
+  register: rt_reg
+
+- name: Create an Internet Gateway
+  amazon.aws.ec2_vpc_igw:
+    vpc_id: "{{ vpc_id }}"
+    region: "{{ region }}"
+    state: present
+    tags:
+      Name: "igw-default"
+  register: igw
+
+- name: Update the main route table to map traffic from private subnets to NAT
+  amazon.aws.ec2_vpc_route_table:
+    vpc_id: "{{ vpc_id }}"
+    region: "{{ region }}"
+    lookup: id
+    route_table_id: "{{ rt_reg.route_tables[0].id }}"
+    subnets: "{{ pvt_subnet_reg.subnets | map(attribute='id') | list }}"
+    routes:
+      - dest: 0.0.0.0/0
+        instance_id: "{{ nat_id }}"
+
+- name: Create a route table for public subnets and register the internet gateway
+  amazon.aws.ec2_vpc_route_table:
+    vpc_id: "{{ vpc_id }}"
+    region: "{{ region }}"
+    subnets: "{{ pub_subnet_reg.subnets | map(attribute='id') | list }}"
+    routes:
+      - dest: 0.0.0.0/0
+        gateway_id: "{{ igw.gateway_id }}"
+    tags:
+      Name: "public-rt"

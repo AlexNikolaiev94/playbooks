@@ -9,5 +9,6 @@
 *pass*
 *password*
 *.txt
+*.pem
 # Shared folder
 shared/

@@ -2,7 +2,7 @@
   amazon.aws.ec2_group:
     name: default-rds-ec2
     description: Security group attached to RDS to allow connecting to the database
-    vpc_id: "{{ vpc_reg.vpc.id }}"
+    vpc_id: "{{ vpc_id }}"
     region: "{{ region }}"
     rules:
       - proto: tcp
@@ -19,7 +19,7 @@
   amazon.aws.ec2_group:
     name: default-ec2-rds
     description: Security group attached to EC2 instances to allow access to RDS
-    vpc_id: "{{ vpc_reg.vpc.id }}"
+    vpc_id: "{{ vpc_id }}"
     region: "{{ region }}"
     rules: []
     rules_egress:
@@ -35,7 +35,7 @@
   amazon.aws.ec2_group:
     name: Web Server
     description: Default VPC security group for webserver instance
-    vpc_id: "{{ vpc_reg.vpc.id }}"
+    vpc_id: "{{ vpc_id }}"
     region: "{{ region }}"
     rules:
       - proto: tcp

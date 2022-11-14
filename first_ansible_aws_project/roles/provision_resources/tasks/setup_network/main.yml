@@ -1,21 +1,41 @@
+- name: Get host's current public IP address
+  uri:
+    url: http://ifconfig.me/ip
+    return_content: yes
+  register: ip_response
+
 - name: Create VPC
   amazon.aws.ec2_vpc_net:
-    name: Default_VPC
+    name: ecom_VPC
     cidr_block: 10.0.0.0/16
     region: "{{ region }}"
     state: present
     tags:
-      Name: 'eCommVPC'
+      Name: 'vpc-main'
   register: vpc_reg
 
-- name: Create public subnets and Internet Gateway
+- name: Create public subnets
+  vars:
+    vpc_id: "{{ vpc_reg.vpc.id }}"
   import_tasks: setup_public_subnets.yml
 
 - name: Create private subnets
+  vars:
+    vpc_id: "{{ vpc_reg.vpc.id }}"
   import_tasks: setup_private_subnets.yml
 
 - name: Create Security Groups
+  vars:
+    ip_addr: "{{ ip_response.content }}"
+    vpc_id: "{{ vpc_reg.vpc.id }}"
   import_tasks: setup_security_groups.yml
 
-- name: Create a NAT instance and map inbound traffic to item
-  import_tasks: create_nat_instance.yml
+- name: Create a NAT instance
+  vars:
+    vpc_id: "{{ vpc_reg.vpc.id }}"
+  import_tasks: setup_nat_instance.yml
+
+- name: Configure route tables and Internet Gateway
+  vars:
+    vpc_id: "{{ vpc_reg.vpc.id }}"
+  import_tasks: setup_routing.yml
