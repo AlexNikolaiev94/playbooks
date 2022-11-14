@@ -13,7 +13,7 @@
         rule_desc: Allow access from EC2 instances within this group to connect to RDS
     rules_egress: []
     tags:
-      Name: 'RDS-inbound-sg'
+      Name: "{{ tag_prefix }}-RDS-EC2-sg"
 
 - name: Create a security group for outbound traffic from EC2 to RDS
   amazon.aws.ec2_group:
@@ -29,7 +29,7 @@
         group_name: default-rds-ec2
         rule_desc: Allow traffic to RDS instances from EC2
     tags:
-      Name: 'EC2-RDS-sg'
+      Name: "{{ tag_prefix }}-EC2-RDS-sg"
 
 - name: Create a security group for NAT instance
   amazon.aws.ec2_group:
@@ -74,4 +74,4 @@
         cidr_ip: "{{ ip_addr }}/32"
         rule_desc: Allow SSH access to NAT instance from host network over internet gateway
     tags:
-      Name: 'nat-sg'
+      Name: "{{ tag_prefix }}-nat-sg"

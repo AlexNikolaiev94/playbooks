@@ -3,7 +3,7 @@
     region: "{{ region }}"
     filters:
       vpc-id: "{{ vpc_id }}"
-      "tag:Name": "pub-subnet-a"
+      "tag:Name": "{{ tag_prefix }}-pub_subnet_a"
   register: subnet_reg
 
 - name: Get the security group for NAT instance
@@ -11,7 +11,7 @@
     region: "{{ region }}"
     filters:
       vpc-id: "{{ vpc_id }}"
-      "tag:Name": "nat-sg"   
+      "tag:Name": "{{ tag_prefix }}-nat-sg"   
   register: sg_reg
 
 - name: Create NAT instance
@@ -25,7 +25,7 @@
       assign_public_ip: yes
     image_id: "{{ nat_instance_al2_image_id }}"
     tags:
-      Name: nat_main
+      Name: "{{ tag_prefix }}-nat"
       Role: NAT
     state: running
     wait: yes

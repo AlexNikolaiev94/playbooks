@@ -6,12 +6,12 @@
 
 - name: Create VPC
   amazon.aws.ec2_vpc_net:
-    name: ecom_VPC
-    cidr_block: 10.0.0.0/16
+    name: "{{ app_name }} VPC"
+    cidr_block: "{{ vpc_cidr }}"
     region: "{{ region }}"
     state: present
     tags:
-      Name: 'vpc-main'
+      Name: "{{ tag_prefix }}-vpc"
   register: vpc_reg
 
 - name: Create public subnets

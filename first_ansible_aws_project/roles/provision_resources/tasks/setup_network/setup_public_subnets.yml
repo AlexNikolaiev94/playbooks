@@ -3,10 +3,10 @@
     state: present
     vpc_id: "{{ vpc_id }}"
     az: "{{ region }}a"
-    cidr: 10.0.0.0/24
+    cidr: "{{ pub_subnet_cidr.subnet_a }}"
     map_public: yes
     tags:
-      Name: 'pub-subnet-a'
+      Name: "{{ tag_prefix }}-pub_subnet_a"
   register: pub_subnet_a
 
 - name: Create a public subnet B
@@ -14,10 +14,10 @@
     state: present
     vpc_id: "{{ vpc_id }}"
     az: "{{ region }}b"
-    cidr: 10.0.1.0/24
+    cidr: "{{ pub_subnet_cidr.subnet_b }}"
     map_public: yes
     tags:
-      Name: 'pub-subnet-b'
+      Name: "{{ tag_prefix }}-pub_subnet_b"
   register: pub_subnet_b
 
 - name: Create a public subnet C
@@ -25,8 +25,8 @@
     state: present
     vpc_id: "{{ vpc_id }}"
     az: "{{ region }}c"
-    cidr: 10.0.2.0/24
+    cidr: "{{ pub_subnet_cidr.subnet_c }}"
     map_public: yes
     tags:
-      Name: 'pub-subnet-c'
+      Name: "{{ tag_prefix }}-pub_subnet_c"
   register: pub_subnet_c

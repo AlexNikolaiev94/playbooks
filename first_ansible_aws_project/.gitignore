@@ -10,5 +10,6 @@
 *password*
 *.txt
 *.pem
+*.env
 # Shared folder
 shared/

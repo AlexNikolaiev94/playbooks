@@ -1,11 +1,11 @@
-- name: Create and store a key to access web server EC2 instance
-  import_tasks: create_ec2_keypair.yml
+# - name: Create and store a key to access EC2 instances
+#   import_tasks: create_ec2_keypair.yml
 
-- name: Setup Networking (VPC, NAT, routing, Security Groups)
-  import_tasks: setup_network/main.yml
+# - name: Setup Networking (VPC, NAT, routing, Security Groups)
+#   import_tasks: setup_network/main.yml
 
 # - name: Create an EC2 instance for webserver
 #   import_tasks: create_ec2_instance.yml
 
-# - name: Create a RDS MariaDB instance
-#   import_tasks: create_rds_instance.yml
+- name: Create a RDS MariaDB instance
+  import_tasks: create_rds_instance.yml

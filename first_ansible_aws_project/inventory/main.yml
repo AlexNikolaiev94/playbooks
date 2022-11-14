@@ -1,5 +1,6 @@
 all:
   vars:
-    ec2_amazonlinux2_image_id: ami-0ee415e1b8b71305f
-    nat_instance_al2_image_id: ami-037981e531e811c07
     region: eu-west-1
+    app_name: ecom 
+    env: dev
+    tag_prefix: "1-{{ env }}-{{ app_name }}"

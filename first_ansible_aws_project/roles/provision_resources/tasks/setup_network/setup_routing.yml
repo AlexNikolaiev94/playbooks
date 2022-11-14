@@ -3,7 +3,7 @@
     region: "{{ region }}"
     filters:
       vpc-id: "{{ vpc_id }}"
-      "tag:Name": "pub-*"
+      "tag:Name": "{{ tag_prefix }}-pub_*"
   register: pub_subnet_reg
 
 - name: Get the private subnets
@@ -11,7 +11,7 @@
     region: "{{ region }}"
     filters:
       vpc-id: "{{ vpc_id }}"
-      "tag:Name": "pvt-*"
+      "tag:Name": "{{ tag_prefix }}-pvt_*"
   register: pvt_subnet_reg
 
 - name: Get the default route table of the VPC
@@ -27,7 +27,7 @@
     region: "{{ region }}"
     state: present
     tags:
-      Name: "igw-default"
+      Name: "{{ tag_prefix }}-igw"
   register: igw
 
 - name: Update the main route table to map traffic from private subnets to NAT
@@ -40,6 +40,8 @@
     routes:
       - dest: 0.0.0.0/0
         instance_id: "{{ nat_id }}"
+    tags:
+      Name: "{{ tag_prefix }}-main-rt"
 
 - name: Create a route table for public subnets and register the internet gateway
   amazon.aws.ec2_vpc_route_table:
@@ -50,4 +52,4 @@
       - dest: 0.0.0.0/0
         gateway_id: "{{ igw.gateway_id }}"
     tags:
-      Name: "public-rt"
+      Name: "{{ tag_prefix }}-pub-rt"

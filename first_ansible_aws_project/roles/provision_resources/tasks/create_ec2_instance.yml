@@ -1,25 +1,26 @@
 - name: Get the subnet for EC2 instance by tag 
   amazon.aws.ec2_vpc_subnet_info:
     filters:
-      "tag:Name": "pvt-subnet-a"
+      "tag:Name": "{{ tag_prefix }}-pvt_subnet_a"
   register: subnet_reg
 
 - name: Get the security groups for EC2 instance by tag
   amazon.aws.ec2_group_info:
     filters:
-      "tag:Name": "EC2-RDS-sg" 
+      "tag:Name": "{{ tag_prefix }}-EC2-RDS-sg" 
   register: sg_reg
 
 - name: Create EC2 instance
   amazon.aws.ec2_instance:
-    name: server_1
+    name: "{{app_name}}_server_1"
     key_name: ecom
     vpc_subnet_id: "{{ subnet_reg.subnets[0].id }}"
-    instance_type: t2.micro
+    instance_type: "{{ ws_instance_type }}"
     security_groups: "{{ sg_reg.security_groups[0].group_id }}"
     network:
-      assign_public_ip: yes
+      assign_public_ip: no
     image_id: "{{ ec2_amazonlinux2_image_id }}"
     tags:
+      Name: "{{ tag_prefix }}-webserver_1"
       Role: Webserver
     wait: yes
