@@ -1,6 +1,6 @@
 galaxy_info:
-  role_name: ec2_ssh_setup
+  role_name: vpc_setup
   author: AlexNikolaiev94
-  description: Provision AWS resources - VPC, EC2, RDS
+  description: Setup VPC and subnets
   license: MIT
   min_ansible_version: '2.4'

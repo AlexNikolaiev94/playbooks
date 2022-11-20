@@ -15,3 +15,14 @@
     dest: "{{ playbook_dir }}/shared/ec2_key.pem"
     mode: 0600
   when: ec2_key.changed
+
+- name: Get host's current public IP address
+  uri:
+    url: http://ifconfig.me/ip
+    return_content: yes
+  register: ip_response
+
+- name: Store the ip address for upcoming roles
+  set_fact:
+    ip_addr: "{{ ip_response.content }}"
+

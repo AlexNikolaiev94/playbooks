@@ -1,0 +1,31 @@
+- set_fact:
+    sg_rules: >
+      {{ 
+        sg_rules | default([]) + [
+          { 'proto': 'tcp', 'ports': [80], 'cidr_ip': item.cidr, 'rule_desc': 'Allow HTTP traffic to private subnet in ' ~ item.az },
+          { 'proto': 'tcp', 'ports': [443], 'cidr_ip': item.cidr, 'rule_desc': 'Allow HTTPS traffic to private subnet in ' ~ item.az}
+        ] 
+      }}
+  loop: "{{ pvt_subnets }}"
+
+- set_fact:
+    sg_rules: >
+      {{ 
+        sg_rules + [{
+          'proto': 'tcp',
+          'ports': [80],
+          'cidr_ip': ip_addr ~ '/32',
+          'rule_desc': 'Allow SSH access to NAT instance from host network over internet gateway'
+        }] 
+      }}
+
+- name: Create a security group for NAT instance
+  amazon.aws.ec2_group:
+    name: ecom-nat-sg
+    description: Default VPC security group for webserver instance
+    vpc_id: "{{ vpc_id }}"
+    region: "{{ region }}"
+    rules: "{{ sg_rules }}"
+    tags:
+      Name: "{{ tag_prefix }}-nat-sg"
+  register: nat_sg_reg

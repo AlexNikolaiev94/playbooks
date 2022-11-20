@@ -1,0 +1,22 @@
+# Common
+tag_prefix: "1-{{ env }}-{{ app_name }}"
+ec2_amazonlinux2_image_id: ami-0ee415e1b8b71305f
+ec2_instance_type: t2.micro
+ec2_key_name: ecom
+aws_ssm_bucket_name: "{{ app_name }}{{ env }}ssm"
+
+# Security group for RDS instances to allow traffic from EC2 instances
+rds_ec2_sg_name: rds-ec2-sg
+rds_ec2_sg_tag_name: "{{ tag_prefix }}-RDS-EC2-sg"
+rds_ec2_sg_desc: Security group attached to RDS to allow connecting to the database
+rds_ec2_rule_desc: Allow access from EC2 instances within this group to connect to RDS
+
+# Security group for EC2 instances to allow traffic to RDS instances
+ec2_rds_sg_name: ec2-rds-sg
+ec2_rds_sg_tag_name: "{{ tag_prefix }}-EC2-RDS-sg"
+ec2_rds_sg_desc: Security group attached to EC2 instances to allow access to RDS
+ec2_rds_rule_desc: Allow traffic to RDS instances from EC2
+
+# RDS vars used in several roles
+rds_port: 3306
+rds_subnet_group: "{{ app_name }}_RDS-EC2-subnets"

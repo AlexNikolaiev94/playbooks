@@ -1,0 +1,19 @@
+- name: Create a Role with permissions for the SSM Agent
+  community.aws.iam_role:
+    name: "{{ app_name }}-EC2-SSM"
+    region: "{{ region }}"
+    assume_role_policy_document: "{{ lookup('ansible.builtin.file', '../files/policy.json') }}"
+    managed_policies:
+      - "{{ aws_ssm_role }}"
+    tags:
+      Name: "{{ tag_prefix }}-iam-ssm-role"
+  register: role_reg
+
+- name: Create an Instance Profile to contain the Role
+  ansible.builtin.command: >
+    aws iam create-instance-profile --instance-profile-name {{ ssm_instance_profile_name }}
+
+- name: Add Role to Instance Profile
+  ansible.builtin.command: >
+    aws iam add-role-to-instance-profile --instance-profile-name {{ ssm_instance_profile_name }}
+      --role-name {{ role_reg.iam_role.role_name }}

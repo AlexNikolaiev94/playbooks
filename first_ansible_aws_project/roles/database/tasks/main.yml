@@ -1,7 +1,19 @@
-- name: Get the security group for RDS instance
-  amazon.aws.ec2_group_info:
-    filters:
-      "tag:Name": "{{tag_prefix}}-RDS-EC2-sg"
+- name: Create a security group for inbound traffic from EC2 to RDS
+  amazon.aws.ec2_group:
+    name: "{{ rds_ec2_sg_name }}"
+    description: "{{ rds_ec2_sg_desc }}"
+    vpc_id: "{{ vpc_id }}"
+    region: "{{ region }}"
+    rules:
+      - proto: tcp
+        ports:
+          - "{{ rds_port }}"
+        group_name: "{{ ec2_rds_sg_name }}"
+        group_desc: "{{ ec2_rds_sg_desc }}"
+        rule_desc: "{{ rds_ec2_rule_desc }}"
+    rules_egress: []
+    tags:
+      Name: "{{ rds_ec2_sg_tag_name }}"
   register: sg_reg
 
 - name: "Create a RDS instance with {{ db_engine }} database"
@@ -12,7 +24,7 @@
     allocated_storage: "{{ db_storage }}"
     db_subnet_group_name: "{{ rds_subnet_group }}"
     vpc_security_group_ids:
-      - "{{ sg_reg.security_groups[0].group_id }}"
+      - "{{ sg_reg.group_id }}"
     engine: "{{ db_engine }}"
     port: "{{ db_port }}"
     state: present
@@ -21,8 +33,3 @@
     db_name: "{{ db_name }}"
     tags:
       Name: "{{ tag_prefix }}-{{ db_engine }}"
-  register: rds_instance
-
-- name: Store the database instance endpoint
-  set_fact:
-    db_endpoint: "{{ rds_instance.endpoint.address }}"

@@ -1,0 +1,2 @@
+aws_ssm_role: arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+ssm_instance_profile_name: "{{app_name}}EC2SSMProfile"

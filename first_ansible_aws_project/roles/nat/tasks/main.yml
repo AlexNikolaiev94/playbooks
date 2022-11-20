@@ -6,31 +6,26 @@
       "tag:Name": "{{ tag_prefix }}-pub_subnet_a"
   register: subnet_reg
 
-- name: Get the security group for NAT instance
-  amazon.aws.ec2_group_info:
-    region: "{{ region }}"
-    filters:
-      vpc-id: "{{ vpc_id }}"
-      "tag:Name": "{{ tag_prefix }}-nat-sg"   
-  register: sg_reg
+- import_tasks: setup_nat_sg.yml
 
-- name: Create NAT instance
+- name: Create a NAT instance
   amazon.aws.ec2_instance:
-    name: nat_instance
-    key_name: ecom
+    name: "{{ tag_prefix }}-nat"
+    key_name: "{{ ec2_key_name }}"
+    instance_type: "{{ ec2_instance_type }}"
+    image_id: "{{ ec2_amazonlinux2_image_id }}"
     vpc_subnet_id: "{{ subnet_reg.subnets[0].id }}"
-    instance_type: t2.micro
-    security_groups: "{{ sg_reg.security_groups[0].group_id }}"
+    security_group: "{{ nat_sg_reg.group_id }}"
     network:
       assign_public_ip: yes
-    image_id: "{{ nat_instance_al2_image_id }}"
+    user_data: "{{ lookup('ansible.builtin.file', '../files/nat_user_data.sh') }}"
     tags:
-      Name: "{{ tag_prefix }}-nat"
       Role: NAT
     state: running
     wait: yes
   register: nat_reg
 
-- name: Store NAT instance ID
+- name: Store NAT instance ID and public IP
   set_fact:
     nat_id: "{{ nat_reg.instances[0].instance_id }}"
+    nat_ip: "{{ nat_reg.instances[0].public_ip_address }}"

@@ -1,0 +1,10 @@
+plugin: aws_ec2
+boto_profile: default
+regions:
+  - eu-west-1
+keyed_groups:
+  - key: tags['Role']
+    prefix: ec2
+    separator: '_'
+filters:
+  tag:Role: Webserver

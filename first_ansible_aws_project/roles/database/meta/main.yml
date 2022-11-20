@@ -1,0 +1,6 @@
+galaxy_info:
+  role_name: database_setup
+  author: AlexNikolaiev94
+  description: Setup the RDS instance of mariadb database
+  license: MIT
+  min_ansible_version: '2.4'

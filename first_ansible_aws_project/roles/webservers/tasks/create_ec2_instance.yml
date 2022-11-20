@@ -1,0 +1,32 @@
+- name: Get the subnet for EC2 instance by tag 
+  amazon.aws.ec2_vpc_subnet_info:
+    filters:
+      "tag:Name": "{{ tag_prefix }}-pvt_subnet_a"
+  register: subnet_reg
+
+- name: Create a S3 bucket for SSM file transfer
+  amazon.aws.s3_bucket:
+    name: "{{ aws_ssm_bucket_name }}"
+    region: "{{ region }}"
+    state: present
+
+- name: Create a boilerplate webserver instance
+  amazon.aws.ec2_instance:
+    key_name: ecom
+    vpc_subnet_id: "{{ subnet_reg.subnets[0].id }}"
+    instance_type: "{{ ec2_instance_type }}"
+    instance_role: "{{ ssm_instance_profile_name }}"
+    security_groups: "{{ sg_id }}"
+    network:
+      assign_public_ip: no
+    image_id: "{{ ec2_amazonlinux2_image_id }}"
+    user_data: "{{ lookup('ansible.builtin.file', '../files/ws_user_data.sh') }}"
+    tags:
+      Name: "{{ tag_prefix }}-webserver_1"
+      Role: Webserver
+    wait: yes
+  register: ws_reg
+
+- name: Store Webserver ID for future play
+  set_fact:
+    ws_instance_id: "{{ ws_reg.instances[0].instance_id }}"

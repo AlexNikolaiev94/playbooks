@@ -1,0 +1,44 @@
+- name: Create VPC
+  amazon.aws.ec2_vpc_net:
+    name: "{{ app_name }} VPC"
+    cidr_block: "{{ vpc_cidr }}"
+    region: "{{ region }}"
+    state: present
+    tags:
+      Name: "{{ tag_prefix }}-vpc"
+  register: vpc_reg
+
+- name: Store the VPC id for future roles
+  set_fact:
+    vpc_id: "{{ vpc_reg.vpc.id }}"
+
+- name: Create public subnets
+  amazon.aws.ec2_vpc_subnet:
+    state: present
+    vpc_id: "{{ vpc_id }}"
+    az: "{{ item.az }}"
+    cidr: "{{ item.cidr }}"
+    map_public: yes
+    tags:
+      Name: "{{ item.name }}"
+  loop: "{{ pub_subnets }}"
+
+- name: Create private subnets
+  amazon.aws.ec2_vpc_subnet:
+    state: present
+    vpc_id: "{{ vpc_id }}"
+    az: "{{ item.az }}"
+    cidr: "{{ item.cidr }}"
+    map_public: yes
+    tags:
+      Name: "{{ item.name }}"
+  loop: "{{ pvt_subnets }}"
+  register: pvt_subnets_reg
+
+- name: Create a RDS subnet group
+  community.aws.rds_subnet_group:
+    state: present
+    name: "{{ rds_subnet_group }}"
+    description: RDS subnet group
+    region: "{{ region }}"
+    subnets: "{{ pvt_subnets_reg.results | json_query('[*].subnet.id') }}"

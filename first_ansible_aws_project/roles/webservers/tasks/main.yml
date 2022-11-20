@@ -1,0 +1,24 @@
+- name: Create a security group for outbound traffic from EC2 to RDS
+  amazon.aws.ec2_group:
+    name: "{{ ec2_rds_sg_name }}"
+    description: "{{ ec2_rds_sg_desc }}"
+    vpc_id: "{{ vpc_id }}"
+    region: "{{ region }}"
+    rules: []
+    rules_egress:
+      - proto: tcp
+        ports:
+          - "{{ rds_port }}"
+        group_name: "{{ rds_ec2_sg_name }}"
+        rule_desc: "{{ ec2_rds_rule_desc }}"
+    tags:
+      Name: "{{ ec2_rds_sg_tag_name }}"
+  register: sg_reg
+
+- name: Create an IAM Role and an Instance Profile for SSM Agent in EC2
+  import_tasks: create_ec2_ssm_profile.yml
+
+- name: Create the first webserver instance
+  vars:
+    sg_id: "{{ sg_reg.group_id }}"
+  import_tasks: create_ec2_instance.yml
