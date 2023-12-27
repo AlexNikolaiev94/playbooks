@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+
+# Round the result of division when converting kB to GB
+roundDivision() {
+    echo $(( ( $1 + $2 / 2) / $2 ))
+}
+
+getRamSizeKB() {
+    local ram_size_kb=$(grep MemTotal /proc/meminfo | awk -F '[ ]+' '{print $2}')
+    echo $ram_size_kb
+}
+
+calcRamSizeGB() {
+    local kb_divisor=1048576
+    echo $(roundDivision $(getRamSizeKB) $kb_divisor)
+}
+
+# Calculate the square root of RAM and round it up due to bc returning a float
+calcRamSqrt() {
+    local ramsize_sqrt=$(echo "sqrt($RAMSIZE)" | bc -l)
+    printf "%.0f" $ramsize_sqrt
+}
+
+calcNoHibernate() {
+    local min_size=$(calcRamSqrt)
+    local max_size=$(( $RAMSIZE * 2 ))
+    echo $(( ( $min_size + $max_size ) / 2 ))
+}
+
+# Calculating the optimal swap partition size depending on whether the user plans to enable hibernation or not
+# Hibernation enabled requires a bigger swap partition due to more RAM being used
+calcSwapSize() {
+    while true; do
+        local reply
+        read -p "Are you planning to use hibernate? This will affect calculations of the optimal swap partition size (y/N): " reply
+        echo
+        case "$reply" in
+            [yY] ) echo $(( $RAMSIZE + $(calcRamSqrt) ));
+            break;;
+            [nN] ) echo $(calcNoHibernate);
+            break;;
+            * ) continue;;
+        esac
+    done
+}
+
+# Let the user provide the swap partition size themselves
+setSwapSize() {
+    while true; do
+        local reply
+        read -p "Please provide a desired swap partition size in GB: " reply
+        echo
+        if ! [[ "$reply" =~ ^[0-9]+$ ]]	;
+        then
+            echo "Value must be an integer."
+            continue
+        else
+            echo $reply
+            break
+        fi
+    done
+}
+
+RAMSIZE=$(calcRamSizeGB)

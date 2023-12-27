@@ -1,6 +1,6 @@
 # Using ansible locally to automate setting up and installation of a fully configured Arch Linux distribution with all the basic packages
 
-## Overview
+<!-- ## Overview
 
 This is a playbook for deploying [a simple eCommerce application](https://github.com/kodekloudhub/learning-app-ecommerce) on AWS using:
 - an EC2 instance as a web server for a PHP application
@@ -18,3 +18,4 @@ This is a playbook for deploying [a simple eCommerce application](https://github
 
 1. Make sure you are logged in to AWS CLI on the ansible host machine. Since this playbook requires a big list of permissions, it is better to create an IAM user with admin privileges and log in to your AWS CLI as that user.
 2. Run `ansible-playbook -i inventory/config.aws_ec2.yml -i inventory/main.yml -e 'ansible_python_interpreter=/usr/bin/python3' playbook.yml` 
+ -->
